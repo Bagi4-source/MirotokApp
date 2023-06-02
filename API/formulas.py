@@ -40,6 +40,16 @@ def generate_image(positive, negative):
     return image
 
 
+def get_recommendation(selected_cards):
+    recommendation = {}
+    for card in selected_cards:
+        recommendations = recommendation.setdefault('ru', [])
+        recommendations.append(card.get('REC_RU', ''))
+        recommendations = recommendation.setdefault('en', [])
+        recommendations.append(card.get('REC_EN', ''))
+    return recommendation
+
+
 def bones_sum(selected_cards):
     bones = []
     for card in selected_cards:

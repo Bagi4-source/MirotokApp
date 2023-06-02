@@ -152,4 +152,6 @@ with open('static/cards.csv', 'r') as f:
             "name": row[4],
             "desc": row[5],
             "EOB": re.findall(r'([А-Я]{2})', row[6].replace(' ', '')),
+            "REC_RU": row[-2],
+            "REC_EN": row[-1],
         }

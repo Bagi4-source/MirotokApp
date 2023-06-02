@@ -9,7 +9,7 @@ from django.db.models.signals import pre_save
 from rest_framework.decorators import api_view
 from API.models import Token, Users, UserInfo, Messages, Tariffs, FBids, Results, Codes, Bill, Diary
 from django.http import JsonResponse
-from API.formulas import formula1, formula2, formula3, formula4
+from API.formulas import formula1, formula2, formula3, formula4, get_recommendation
 import binascii
 import os
 from Backend.settings import cards
@@ -320,6 +320,8 @@ def set_test(request):
 
     selected_cards = select_card(data)
 
+    recommendation = get_recommendation(selected_cards)
+
     text = "Вы выбрали репродукции картин Мироток:\n"
     text += "\n".join([f"• {x.get('id', '')}.{x.get('name', '')}" for x in selected_cards])
     text += "\nОписание картин в таблице...\nАвтор живописных картин Бендицкий Игорь Эдуардович | BENDITSKIY IGOR"
@@ -360,7 +362,8 @@ def set_test(request):
     data = {
         "text": texts,
         "images": images,
-        "results": results
+        "results": results,
+        "recommendation": recommendation
     }
 
     resultObj.result = data
