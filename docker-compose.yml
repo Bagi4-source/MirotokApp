@@ -1,0 +1,29 @@
+version: '3.9'
+# docker network create --gateway 192.168.10.1 --subnet 192.168.10.0/24 backend
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "sgucr+cq*y"
+  backend:
+    build: .
+    command: bash -c "python3 manage.py makemigrations && python3 manage.py migrate && echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@myproject.com', 'germanAdmin')\" | python manage.py shell && uvicorn Backend.asgi:application --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      SECRET_KEY: 'django-insecure-g48yzb4du^qr(25^g#6if1j%29lmq39&x1^v6&f=ftx4bj*07*'
+      DEBUG: 1
+      DJANGO_ALLOWED_HOSTS: '*'
+      POSTGRES_DBNAME: 'db'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: "sgucr+cq*y"
+      POSTGRES_HOST: 'postgres'
+      POSTGRES_PORT: '5432'
+    restart: always
