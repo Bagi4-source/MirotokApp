@@ -137,7 +137,7 @@ MEDIA_URL = 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 cards = {}
-
+os.makedirs('media/results', exist_ok=True)
 with open('static/cards.csv', 'r') as f:
     reader = csv.reader(f)
     for i, row in enumerate(reader):
