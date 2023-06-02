@@ -77,6 +77,16 @@ def get_res_string(items, key):
     return f"{'ВП' if items[key] > 0 else 'НЗ' if items[key] < 0 else ''} {get_degree(items[key])}"
 
 
+def get_percent(x):
+    if x >= 19:
+        return 7.35 - (x - 19) * 0.025
+    if x <= -19:
+        return 7.45 - (x + 19) * 0.025
+    if x == 0:
+        return 7.4
+    return 7.4 + x * 0.05 / 19
+
+
 def get_image(items):
     image = Image.open(os.path.join(ARROWS_DIR, 'bg.png'))
     for key, value in items.items():

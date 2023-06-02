@@ -9,7 +9,7 @@ from django.db.models.signals import pre_save
 from rest_framework.decorators import api_view
 from API.models import Token, Users, UserInfo, Messages, Tariffs, FBids, Results, Codes, Bill, Diary
 from django.http import JsonResponse
-from API.formulas import formula1, formula2, formula3, formula4, get_recommendation
+from API.formulas import formula1, formula2, formula3, formula4, get_recommendation, get_percent
 import binascii
 import os
 from Backend.settings import cards
@@ -333,7 +333,8 @@ def set_test(request):
     f2_text = formula2(selected_cards)
 
     texts.append(f1_text)
-    texts.append(f"Результат: {f2_text}%")
+    texts.append(f"Результат:\nБаланс энергоемкости: {f2_text}%\n"
+                 f"Баланс кислотно-щелочной среды: {round(get_percent(f2_text) * 1000) / 1000}pH")
 
     resultObj = Results.objects.create(percent=int(f2_text), user=userObj)
 
