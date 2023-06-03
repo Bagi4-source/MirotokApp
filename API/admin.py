@@ -60,14 +60,14 @@ class BillAdmin(admin.ModelAdmin):
 
 @admin.register(Messages)
 class MessagesAdmin(admin.ModelAdmin):
-    search_fields = ["user"]
-    list_display = ["user", "text", "private", "create_time"]
+    search_fields = ["user", "title"]
+    list_display = ["user", "title", "private", "create_time"]
     readonly_fields = ("create_time", "update_time")
     date_hierarchy = "create_time"
 
 
 @admin.register(Diary)
-class MessagesAdmin(admin.ModelAdmin):
+class DiaryAdmin(admin.ModelAdmin):
     search_fields = ["type"]
     list_display = ["text", "type", "create_time"]
     readonly_fields = ("create_time", "update_time")

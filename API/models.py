@@ -121,6 +121,7 @@ class Bill(TimeMixin):
 
 class Messages(TimeMixin):
     user = models.ForeignKey(Users, null=True, blank=True, on_delete=models.CASCADE, verbose_name='User ID')
+    title = models.CharField(verbose_name='Title', max_length=100)
     text = models.CharField(verbose_name='Text', max_length=1000)
     private = models.BooleanField(verbose_name='Private', default=False)
 

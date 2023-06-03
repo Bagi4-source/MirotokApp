@@ -401,8 +401,10 @@ def get_main(request):
         for message in Messages.objects.filter(Q(user=user) | Q(private=False)).order_by('-id')[: 3]:
             messages.append({
                 "id": message.id,
+                "title": message.title,
                 "text": message.text,
                 "private": message.private,
+                "time": int(message.create_time.timestamp()),
             })
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
@@ -477,14 +479,14 @@ def get_result(request):
     if not tokenObj:
         return JsonResponse({"success": 0, "error": "Token not found"})
 
-    user = tokenObj.first().user
+    userObj = tokenObj.first().user
 
     try:
         result_id = int(body.get('result_id'))
     except:
         return JsonResponse({"success": 0, "error": "Incorrect data"})
 
-    resultObj = Results.objects.filter(id=result_id)
+    resultObj = Results.objects.filter(id=result_id, user=userObj)
     if not resultObj:
         return JsonResponse({"success": 0, "error": "Result not found"})
 
