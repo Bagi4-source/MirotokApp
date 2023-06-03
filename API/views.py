@@ -446,6 +446,7 @@ def get_results(request):
     try:
         for result in Results.objects.filter(user=user).order_by('-id')[offset: limit + offset]:
             res = {
+                "result_id": result.id,
                 "percent": result.percent
             }
             if body.get('extra', 0):
@@ -457,6 +458,42 @@ def get_results(request):
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
 
+    return JsonResponse({"success": 1, "data": data})
+
+
+@sync_to_async
+@api_view(["POST"])
+def get_result(request):
+    body = json.loads(request.body.decode())
+    necessary_keys = ['result_id']
+
+    for key in necessary_keys:
+        if key not in body:
+            return JsonResponse(
+                {"success": 0, "error": f"The request must contain the following parameters: {necessary_keys}"})
+
+    token = request.headers.get('token', '')
+    tokenObj = Token.objects.filter(token=token)
+    if not tokenObj:
+        return JsonResponse({"success": 0, "error": "Token not found"})
+
+    user = tokenObj.first().user
+
+    try:
+        result_id = int(body.get('result_id'))
+    except:
+        return JsonResponse({"success": 0, "error": "Incorrect data"})
+
+    resultObj = Results.objects.filter(id=result_id)
+    if not resultObj:
+        return JsonResponse({"success": 0, "error": "Result not found"})
+
+    result = resultObj.first()
+    data = {
+        "percent": result.percent,
+        "result": result.result,
+        "time": int(result.create_time.timestamp()),
+    }
     return JsonResponse({"success": 1, "data": data})
 
 

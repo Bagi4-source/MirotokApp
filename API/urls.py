@@ -18,6 +18,7 @@ urlpatterns = [
     path('set_test/', views.set_test, name='SetTest'),
     path('get_main/', views.get_main, name='GetMain'),
     path('get_results/', views.get_results, name='GetResults'),
+    path('get_result/', views.get_result, name='GetResult'),
     path('get_products/', views.get_products, name='GetProducts'),
     path('buy/', views.buy, name='Buy'),
     path('validate_buy/', views.validate_buy, name='ValidateBuy'),
