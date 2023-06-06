@@ -45,7 +45,7 @@ class UserInfo(TimeMixin):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='User')
     name = models.CharField(verbose_name='Name', max_length=100)
     surname = models.CharField(verbose_name='Surname', max_length=100)
-
+    lang = models.CharField(verbose_name='Lang', max_length=5, default='ru')
     height = models.FloatField(verbose_name='Height', validators=[MinValueValidator(0)])
     weight = models.FloatField(verbose_name='Weight', validators=[MinValueValidator(0)])
     age = models.IntegerField(verbose_name='Age', validators=[MinValueValidator(0)])

@@ -155,7 +155,7 @@ def check_code(request):
 @api_view(["POST"])
 def register(request):
     body = json.loads(request.body.decode())
-    necessary_keys = ['name', 'surname', 'height', 'weight', 'age']
+    necessary_keys = ['name', 'surname', 'height', 'weight', 'age', 'lang']
     for key in necessary_keys:
         if key not in body:
             return JsonResponse(
@@ -172,6 +172,7 @@ def register(request):
         height = int(body.get('height'))
         surname = body.get('surname').strip()
         name = body.get('name').strip()
+        lang = body.get('lang').strip()
         if age < 0:
             raise Exception('Age must be >= 0')
         if weight < 0:
@@ -182,13 +183,15 @@ def register(request):
             raise Exception('Name is empty')
         if not surname:
             raise Exception('Surname is empty')
+        if not lang:
+            raise Exception('Lang is empty')
     except Exception as e:
         return JsonResponse({"success": 0, "error": str(e)})
 
     user = tokenObj.first().user
     userObj = UserInfo.objects.filter(user=user)
     if not userObj:
-        UserInfo.objects.create(user=user, weight=weight, age=age, height=height, name=name, surname=surname)
+        UserInfo.objects.create(user=user, weight=weight, age=age, height=height, name=name, surname=surname, lang=lang)
     else:
         userObj = userObj.first()
         userObj.weight = weight
@@ -196,6 +199,7 @@ def register(request):
         userObj.name = name
         userObj.surname = surname
         userObj.height = height
+        userObj.lang = lang
         userObj.save()
 
     return JsonResponse({"success": 1})
@@ -219,6 +223,7 @@ def get_me(request):
         data["height"] = user_info.height
         data["weight"] = user_info.weight
         data["age"] = user_info.age
+        data["lang"] = user_info.lang
 
     data["phone"] = str(user)
     data["subscription_end"] = time.mktime(user.subscription_end.timetuple())
