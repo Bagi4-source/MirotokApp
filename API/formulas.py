@@ -164,6 +164,7 @@ def formula4(selected_cards):
     if positive:
         text.append(f'Реальные потребности: {", ".join([f"{value}{key}" for key, value in positive.items()])}')
     text = "\n".join(text)
+    text = 'Реальные и скрытые потребности:\n' + text
 
     image = get_image(result)
     img = image.convert('RGB')

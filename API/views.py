@@ -338,7 +338,7 @@ def set_test(request):
     f2_text = formula2(selected_cards)
 
     texts.append(f1_text)
-    texts.append(f"Результат:\nБаланс энергоемкости: {f2_text}%\n"
+    texts.append(f"Баланс энергоемкости: {f2_text}%\n"
                  f"Баланс кислотно-щелочной среды: {round(get_percent(f2_text) * 1000) / 1000}pH")
 
     resultObj = Results.objects.create(percent=int(f2_text), user=userObj)
