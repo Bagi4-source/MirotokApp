@@ -191,11 +191,18 @@ def formula3(selected_cards):
         if item in positive:
             neg_copy.remove(item)
 
+    text = []
+    if pos_copy:
+        text.append(f"Реальные: {', '.join(pos_copy)}")
+    if neg_copy:
+        text.append(f"Скрытые: {', '.join(neg_copy)}")
+    text = '\n'.join(text)
+
     img = generate_image(pos_copy, neg_copy)
     img = img.convert('RGB')
     name = get_random_name('media/results', 'jpg')
     img.save(name)
-    return name, positive
+    return name, text
 
 
 def formula2(selected_cards):

@@ -346,6 +346,7 @@ def set_test(request):
     f3_image, f3_text = formula3(selected_cards)
     f4_image, f4_text = formula4(selected_cards)
 
+    texts.append(f"Остаточные эмоционально образные блоки:\n{f3_text}")
     texts.append(f4_text)
 
     protocol = 'https' if request.is_secure() else 'http'
