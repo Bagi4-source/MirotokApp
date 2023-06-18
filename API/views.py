@@ -41,13 +41,13 @@ def get_images(request):
             vertical.append({
                 "image_id": int(key),
                 "title": card.get('name', ''),
-                "image": f'{host}/media/test_images/{key}.jpg'
+                "image": f'{host}/media/test_images/vertical/{key}.jpg'
             })
         if os.path.isfile(f'media/test_images/horizontal/{key}.jpg'):
             horizontal.append({
                 "image_id": int(key),
                 "title": card.get('name', ''),
-                "image": f'{host}/media/test_images/{key}.jpg'
+                "image": f'{host}/media/test_images/horizontal/{key}.jpg'
             })
     random.shuffle(vertical)
     random.shuffle(horizontal)
