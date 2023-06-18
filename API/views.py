@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta
 import json
 import re
@@ -30,16 +31,28 @@ def send_code(phone):
 
 
 def get_images(request):
-    images = []
+    images = {}
+    vertical = []
+    horizontal = []
     protocol = 'https' if request.is_secure() else 'http'
     host = f'{protocol}://{request.get_host()}'
     for key, card in cards.items():
-        if os.path.isfile(f'media/test_images/{key}.jpg'):
-            images.append({
+        if os.path.isfile(f'media/test_images/vertical/{key}.jpg'):
+            vertical.append({
                 "image_id": int(key),
                 "title": card.get('name', ''),
                 "image": f'{host}/media/test_images/{key}.jpg'
             })
+        if os.path.isfile(f'media/test_images/horizontal/{key}.jpg'):
+            horizontal.append({
+                "image_id": int(key),
+                "title": card.get('name', ''),
+                "image": f'{host}/media/test_images/{key}.jpg'
+            })
+    random.shuffle(vertical)
+    random.shuffle(horizontal)
+    images['vertical'] = vertical
+    images['horizontal'] = horizontal
     return images
 
 
