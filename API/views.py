@@ -753,6 +753,24 @@ def get_avatar(request):
     return JsonResponse({"success": 1, "avatar": f"{host}/media/avatars/user.png"})
 
 
+@sync_to_async
+@api_view(["POST"])
+def logout(request):
+    token = request.headers.get('token', '')
+    tokenObj = Token.objects.filter(token=token)
+    if not tokenObj:
+        return JsonResponse({"success": 0, "error": "Token not found"})
+    try:
+        fbid = FBids.objects.filter(token=tokenObj)
+        if fbid:
+            fbid.delete()
+
+        tokenObj.delete()
+    except Exception as e:
+        return JsonResponse({"success": 0, "error": str(e)})
+    return JsonResponse({"success": 1})
+
+
 @receiver(pre_save, sender=Bill)
 def my_callback(sender, instance, *args, **kwargs):
     current_bill = Bill.objects.filter(pk=instance.pk)

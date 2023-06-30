@@ -26,6 +26,7 @@ urlpatterns = [
     path('get_my_diary/', views.get_my_diary, name='GetMyDiary'),
     path('set_avatar/', views.set_avatar, name='SetAvatar'),
     path('get_avatar/', views.get_avatar, name='GetAvatar'),
+    path('logout/', views.logout, name='Logout'),
 ]
 admin_urls = [
     path('get_users/', admin_views.get_users, name='GetUsers'),
