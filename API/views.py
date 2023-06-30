@@ -375,7 +375,8 @@ def set_test(request):
         for result in Results.objects.filter(user=userObj).order_by('-id')[:30]:
             results.append({
                 "time": int(result.create_time.timestamp()),
-                "result": result.percent
+                "result": result.percent,
+                "resultPh": round(get_percent(result.percent) * 1000) / 1000
             })
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
@@ -469,7 +470,8 @@ def get_results(request):
         for result in Results.objects.filter(user=user).order_by('-id')[offset: limit + offset]:
             res = {
                 "result_id": result.id,
-                "percent": result.percent
+                "percent": result.percent,
+                "percentPh": round(get_percent(result.percent) * 1000) / 1000
             }
             if body.get('extra', 0):
                 res["result"] = result.result
@@ -514,6 +516,7 @@ def get_result(request):
     data = {
         "percent": result.percent,
         "result": result.result,
+        "resultPh": round(get_percent(result.percent) * 1000) / 1000,
         "time": int(result.create_time.timestamp()),
     }
     return JsonResponse({"success": 1, "data": data})

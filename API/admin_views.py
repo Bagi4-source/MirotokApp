@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import json
 import re
 import time
-
+from django.db.models import Q
 from asgiref.sync import sync_to_async
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from API.models import Token, Users, UserInfo, Messages, Tariffs, FBids, Results, Codes, Bill, Diary
 from django.http import JsonResponse
-from API.formulas import formula1, formula2, formula3, formula4
+from API.formulas import formula1, formula2, formula3, formula4, get_percent
 import binascii
 import os
 from Backend.settings import cards
@@ -190,10 +190,6 @@ def get_all_messages(request):
     if not tokenObj:
         return JsonResponse({"success": 0, "error": "Token not found"})
 
-    tokenObj = tokenObj.first()
-    if tokenObj.user.role != 1:
-        return JsonResponse({"success": 0, "error": "Permission issue"})
-
     try:
         offset = int(body.get('offset'))
         limit = int(body.get('limit'))
@@ -205,8 +201,15 @@ def get_all_messages(request):
         return JsonResponse({"success": 0, "error": "Incorrect data"})
 
     messages = []
+
+    tokenObj = tokenObj.first()
+    if tokenObj.user.role != 1:
+        all_messages = Messages.objects.filter(Q(user=tokenObj.user) | Q(user=None)).order_by('-id')[
+                       offset: limit + offset]
+    else:
+        all_messages = Messages.objects.all().order_by('-id')[offset: limit + offset]
     try:
-        for message in Messages.objects.all().order_by('-id')[offset: limit + offset]:
+        for message in all_messages:
             messages.append({
                 "id": message.id,
                 "title": message.title,
@@ -265,7 +268,8 @@ def get_user_results(request):
     try:
         for result in Results.objects.filter(user=userObj).order_by('-id')[offset: limit + offset]:
             res = {
-                "percent": result.percent
+                "percent": result.percent,
+                "resultPh": round(get_percent(result.percent) * 1000) / 1000,
             }
             if body.get('extra', 0):
                 res["result"] = result.result
@@ -277,6 +281,7 @@ def get_user_results(request):
         return JsonResponse({"success": 0, "error": f"{e}"})
 
     return JsonResponse({"success": 1, "data": data})
+
 
 @sync_to_async
 @api_view(["POST"])
@@ -311,9 +316,11 @@ def get_user_result(request):
     data = {
         "percent": result.percent,
         "result": result.result,
+        "resultPh": round(get_percent(result.percent) * 1000) / 1000,
         "time": int(result.create_time.timestamp()),
     }
     return JsonResponse({"success": 1, "data": data})
+
 
 @sync_to_async
 @api_view(["POST"])
