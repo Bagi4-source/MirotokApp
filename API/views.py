@@ -339,7 +339,7 @@ def set_test(request):
 
     selected_cards = select_card(data)
 
-    recommendation = get_recommendation(selected_cards)
+    recommendation = get_recommendation(selected_cards, userObj.lang)
 
     text = "Вы выбрали репродукции картин Мироток:\n"
     text += "\n".join([f"• {x.get('id', '')}.{x.get('name', '')}" for x in selected_cards])
@@ -763,7 +763,7 @@ def logout(request):
     try:
         fbid = FBids.objects.filter(token=tokenObj)
         if fbid:
-            fbid.delete()
+            fbid.first().delete()
 
         tokenObj.delete()
     except Exception as e:

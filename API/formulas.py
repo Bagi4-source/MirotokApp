@@ -40,13 +40,14 @@ def generate_image(positive, negative):
     return bg
 
 
-def get_recommendation(selected_cards):
-    recommendation = {}
+def get_recommendation(selected_cards, lang="ru"):
+    langs = {
+        "ru": "REC_RU"
+    }
+    recommendation = []
+    key = langs.get(lang[:2], "REC_EN")
     for card in selected_cards:
-        recommendations = recommendation.setdefault('ru', [])
-        recommendations.append(card.get('REC_RU', ''))
-        recommendations = recommendation.setdefault('en', [])
-        recommendations.append(card.get('REC_EN', ''))
+        recommendation.append(card.get(key, ''))
     return recommendation
 
 
