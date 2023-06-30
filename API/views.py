@@ -1,3 +1,4 @@
+import logging
 import random
 from datetime import datetime, timedelta
 import json
@@ -717,8 +718,14 @@ def set_avatar(request):
     if not body:
         return JsonResponse({"success": 0, "error": "Body is empty"})
 
-    supported_types = ['png', 'jpg']
-    if filetype.guess(body).extension not in supported_types:
+    supported_types = ['png', 'jpg', 'jpeg']
+
+    file = filetype.guess(body)
+
+    if not file:
+        return JsonResponse({"success": 0, "error": "Incorrect file"})
+
+    if file.extension not in supported_types:
         return JsonResponse({"success": 0, "error": f"Incorrect extension. Supported extension: {supported_types}"})
 
     with open(f'media/avatars/{tokenObj.first().user.id}.jpg', 'wb') as photo:
