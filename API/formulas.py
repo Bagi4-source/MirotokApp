@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from PIL import Image, ImageFont, ImageDraw
 import os
 import re
@@ -167,10 +169,12 @@ def formula4(selected_cards):
     text = 'Реальные и скрытые потребности:\n' + text
 
     image = get_image(result)
-    img = image.convert('RGB')
-    name = get_random_name('media/results', 'jpg')
-    img.save(name)
-    return name, text
+    bio = BytesIO()
+    bio.name = 'image.png'
+    image.save(bio, 'PNG')
+    size = bio.tell()
+    bio.seek(0)
+    return bio, size, text
 
 
 def sort_f(x):
@@ -213,10 +217,12 @@ def formula3(selected_cards):
     text = '\n'.join(text)
 
     img = generate_image(pos_copy, neg_copy)
-    img = img.convert('RGB')
-    name = get_random_name('media/results', 'jpg')
-    img.save(name)
-    return name, text
+    bio = BytesIO()
+    bio.name = 'image.png'
+    img.save(bio, 'PNG')
+    size = bio.tell()
+    bio.seek(0)
+    return bio, size, text
 
 
 def formula2(selected_cards):

@@ -1,14 +1,18 @@
 import logging
 import random
+import uuid
 from datetime import datetime, timedelta
 import json
 import re
 import time
+from io import BytesIO
+
 from django.db.models import Q
 from asgiref.sync import sync_to_async
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
 from rest_framework.decorators import api_view
+from API.minioClient import MinioClient
 from API.models import Token, Users, UserInfo, Messages, Tariffs, FBids, Results, Codes, Bill, Diary
 from django.http import JsonResponse
 from API.formulas import formula1, formula2, formula3, formula4, get_recommendation, get_percent
@@ -16,6 +20,8 @@ import binascii
 import os
 from Backend.settings import cards
 import filetype
+
+minio = MinioClient()
 
 
 def generate_key(length=20):
@@ -335,11 +341,18 @@ def set_test(request):
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"Incorrect data: ({e})"})
 
+    lang = "ru"
+
     userObj = tokenObj.first().user
+    user_info = UserInfo.objects.filter(user=userObj)
+
+    if user_info:
+        user_info = user_info.first()
+        lang = user_info.lang
 
     selected_cards = select_card(data)
 
-    recommendation = get_recommendation(selected_cards, userObj.lang)
+    recommendation = get_recommendation(selected_cards, lang)
 
     text = "Вы выбрали репродукции картин Мироток:\n"
     text += "\n".join([f"• {x.get('id', '')}.{x.get('name', '')}" for x in selected_cards])
@@ -357,8 +370,8 @@ def set_test(request):
 
     resultObj = Results.objects.create(percent=int(f2_text), user=userObj)
 
-    f3_image, f3_text = formula3(selected_cards)
-    f4_image, f4_text = formula4(selected_cards)
+    f3_image, size3, f3_text = formula3(selected_cards)
+    f4_image, size4, f4_text = formula4(selected_cards)
 
     texts.append(f"Остаточные эмоционально-образные блоки:\n{f3_text}")
     texts.append(f4_text)
@@ -366,8 +379,15 @@ def set_test(request):
     protocol = 'https' if request.is_secure() else 'http'
     host = f'{protocol}://{request.get_host()}'
 
-    images.append(f"{host}/{f3_image}")
-    images.append(f"{host}/{f4_image}")
+    file_name3 = f"user{userObj.id}{int(time.time())}{uuid.uuid4()}.png"
+    file_name4 = f"user{userObj.id}{int(time.time())}{uuid.uuid4()}.png"
+
+    minio.save_image_bytes("results", file_name3, f3_image, size3)
+    minio.save_image_bytes("results", file_name4, f4_image, size4)
+
+    images.append(f"{minio.get_url('results', file_name3)}")
+    images.append(f"{minio.get_url('results', file_name4)}")
+
     images.append(f"{host}/media/table.png")
 
     results = []
@@ -731,8 +751,14 @@ def set_avatar(request):
     if file.extension not in supported_types:
         return JsonResponse({"success": 0, "error": f"Incorrect extension. Supported extension: {supported_types}"})
 
-    with open(f'media/avatars/{tokenObj.first().user.id}.jpg', 'wb') as photo:
-        photo.write(body)
+    file_name = f"user{tokenObj.first().user.id}.png"
+    bio = BytesIO()
+    bio.name = file_name
+    bio.write(body)
+    bio.seek(0)
+
+    minio.save_image_bytes("avatars", file_name, bio, len(body))
+
     return JsonResponse({"success": 1})
 
 
@@ -744,13 +770,13 @@ def get_avatar(request):
     if not tokenObj:
         return JsonResponse({"success": 0, "error": "Token not found"})
 
-    path = f'media/avatars/{tokenObj.first().user.id}.jpg'
-    protocol = 'https' if request.is_secure() else 'http'
-    host = f'{protocol}://{request.get_host()}'
+    path = minio.get_url("avatars", f"user{tokenObj.first().user.id}.png")
+    if not path:
+        path = minio.get_url("avatars", f"user.png")
 
     if os.path.exists(path):
-        return JsonResponse({"success": 1, "avatar": f"{host}/{path}"})
-    return JsonResponse({"success": 1, "avatar": f"{host}/media/avatars/user.png"})
+        return JsonResponse({"success": 1, "avatar": path})
+    return JsonResponse({"success": 1, "avatar": path})
 
 
 @sync_to_async
