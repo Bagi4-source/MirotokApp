@@ -27,7 +27,7 @@ services:
       POSTGRES_HOST: 'postgres'
       POSTGRES_PORT: '5432'
       MINIO_ROOT_USER: GermanAdmin
-      MINIO_ROOT_HOST: minio
+      MINIO_ROOT_HOST: "80.78.240.191"
       MINIO_ROOT_PASSWORD: German123Minio
     restart: always
   minio:
