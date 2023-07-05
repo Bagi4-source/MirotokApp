@@ -48,7 +48,9 @@ def get_users(request):
 
     search = str(body.get('search')).strip()
     if search:
-        queryset = UserInfo.objects.filter(search=search).order_by('-id')[offset: limit + offset]
+        queryset = UserInfo.objects.filter(
+            Q(name__search=search) | Q(surname__search=search) | Q(user__number__search=search)).order_by('-id')[
+                   offset: limit + offset]
     else:
         queryset = UserInfo.objects.all().order_by('-id')[offset: limit + offset]
 
