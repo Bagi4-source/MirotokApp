@@ -46,9 +46,15 @@ def get_users(request):
     except:
         return JsonResponse({"success": 0, "error": "Incorrect data"})
 
+    search = str(body.get('search')).strip()
+    if search:
+        queryset = UserInfo.objects.filter(search=search).order_by('-id')[offset: limit + offset]
+    else:
+        queryset = UserInfo.objects.all().order_by('-id')[offset: limit + offset]
+
     users = []
     try:
-        for user in UserInfo.objects.all().order_by('-id')[offset: limit + offset]:
+        for user in queryset:
             users.append({
                 "id": user.user.id,
                 "name": user.name,

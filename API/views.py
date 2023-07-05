@@ -6,7 +6,6 @@ import json
 import re
 import time
 from io import BytesIO
-
 from django.db.models import Q
 from asgiref.sync import sync_to_async
 from django.dispatch import receiver
@@ -23,6 +22,10 @@ import filetype
 
 minio = MinioClient()
 
+ROLES = {
+    "1": "admin",
+    "0": "client",
+}
 
 def generate_key(length=20):
     return binascii.hexlify(os.urandom(length)).decode()
@@ -247,6 +250,7 @@ def get_me(request):
 
     data["phone"] = str(user)
     data["subscription_end"] = time.mktime(user.subscription_end.timetuple())
+    data["role"] = ROLES.get(f"{user.role}", "client")
 
     return JsonResponse({"success": 1, "data": data})
 
