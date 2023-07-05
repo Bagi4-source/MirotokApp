@@ -46,7 +46,7 @@ def get_users(request):
     except:
         return JsonResponse({"success": 0, "error": "Incorrect data"})
 
-    search = str(body.get('search')).strip()
+    search = str(body.get('search', '')).strip()
     if search:
         queryset = UserInfo.objects.filter(
             Q(name__icontains=search) | Q(surname__icontains=search) | Q(user__number__icontains=search)).order_by(
