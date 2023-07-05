@@ -49,7 +49,8 @@ def get_users(request):
     search = str(body.get('search')).strip()
     if search:
         queryset = UserInfo.objects.filter(
-            Q(name__search=search) | Q(surname__search=search) | Q(user__number__search=search)).order_by('-id')[
+            Q(name__icontains=search) | Q(surname__icontains=search) | Q(user__number__icontains=search)).order_by(
+            '-id')[
                    offset: limit + offset]
     else:
         queryset = UserInfo.objects.all().order_by('-id')[offset: limit + offset]
@@ -68,7 +69,7 @@ def get_users(request):
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
 
-    return JsonResponse({"success": 1, "users": users})
+    return JsonResponse({"success": 1, "users": users, "total": UserInfo.objects.count()})
 
 
 @sync_to_async
@@ -212,10 +213,12 @@ def get_all_messages(request):
 
     tokenObj = tokenObj.first()
     if tokenObj.user.role != 1:
-        all_messages = Messages.objects.filter(Q(user=tokenObj.user) | Q(user=None)).order_by('-id')[
-                       offset: limit + offset]
+        queryset = Messages.objects.filter(Q(user=tokenObj.user) | Q(user=None)).order_by('-id')
+        all_messages = queryset[offset: limit + offset]
+        total = queryset.count()
     else:
         all_messages = Messages.objects.all().order_by('-id')[offset: limit + offset]
+        total = Messages.objects.count()
     try:
         for message in all_messages:
             messages.append({
@@ -229,7 +232,7 @@ def get_all_messages(request):
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
 
-    return JsonResponse({"success": 1, "messages": messages})
+    return JsonResponse({"success": 1, "messages": messages, "total": total})
 
 
 @sync_to_async
@@ -288,7 +291,7 @@ def get_user_results(request):
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
 
-    return JsonResponse({"success": 1, "data": data})
+    return JsonResponse({"success": 1, "data": data, "total": Results.objects.filter(user=userObj).count()})
 
 
 @sync_to_async
@@ -377,4 +380,4 @@ def get_user_diary(request):
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
 
-    return JsonResponse({"success": 1, "diary": data})
+    return JsonResponse({"success": 1, "diary": data, "total": Diary.objects.filter(user=userObj).count()})

@@ -506,7 +506,7 @@ def get_results(request):
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
 
-    return JsonResponse({"success": 1, "data": data})
+    return JsonResponse({"success": 1, "data": data, "total": Results.objects.filter(user=user).count()})
 
 
 @sync_to_async
