@@ -8,12 +8,16 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_save
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from API.minioClient import MinioClient
 from API.models import Token, Users, UserInfo, Messages, Tariffs, FBids, Results, Codes, Bill, Diary
 from django.http import JsonResponse
 from API.formulas import formula1, formula2, formula3, formula4, get_percent
 import binascii
 import os
+from API.views import ROLES
 from Backend.settings import cards
+
+minio = MinioClient()
 
 
 @sync_to_async
@@ -58,13 +62,21 @@ def get_users(request):
     users = []
     try:
         for user in queryset:
+            path = minio.get_url("avatars", f"user{user.user.id}.png")
+            if not path:
+                path = minio.get_url("avatars", f"user.png")
             users.append({
                 "id": user.user.id,
+                "phone": user.user.number,
                 "name": user.name,
                 "surname": user.surname,
                 "height": user.height,
                 "weight": user.weight,
                 "age": user.age,
+                "lang": user.lang,
+                "subscription_end": time.mktime(user.user.subscription_end.timetuple()),
+                "role": ROLES.get(f"{user.user.role}", "client"),
+                "avatar": path
             })
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
@@ -102,13 +114,21 @@ def get_user(request):
         user = UserInfo.objects.filter(id=user_id)
         if user:
             user = user.first()
+            path = minio.get_url("avatars", f"user{user.user.id}.png")
+            if not path:
+                path = minio.get_url("avatars", f"user.png")
             userData = {
                 "id": user.user.id,
+                "phone": user.user.number,
                 "name": user.name,
                 "surname": user.surname,
                 "height": user.height,
                 "weight": user.weight,
                 "age": user.age,
+                "lang": user.lang,
+                "subscription_end": time.mktime(user.user.subscription_end.timetuple()),
+                "role": ROLES.get(f"{user.user.role}", "client"),
+                "avatar": path
             }
     except Exception as e:
         return JsonResponse({"success": 0, "error": f"{e}"})
