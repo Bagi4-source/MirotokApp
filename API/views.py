@@ -27,6 +27,7 @@ ROLES = {
     "0": "client",
 }
 
+
 def generate_key(length=20):
     return binascii.hexlify(os.urandom(length)).decode()
 
@@ -525,19 +526,23 @@ def get_result(request):
     if not tokenObj:
         return JsonResponse({"success": 0, "error": "Token not found"})
 
-    userObj = tokenObj.first().user
-
     try:
         result_id = int(body.get('result_id'))
     except:
         return JsonResponse({"success": 0, "error": "Incorrect data"})
 
-    resultObj = Results.objects.filter(id=result_id, user=userObj)
+    tokenObj = tokenObj.first()
+    if tokenObj.user.role != 1:
+        resultObj = Results.objects.filter(id=result_id, user=tokenObj.user)
+    else:
+        resultObj = Results.objects.filter(id=result_id)
+
     if not resultObj:
         return JsonResponse({"success": 0, "error": "Result not found"})
 
     result = resultObj.first()
     data = {
+        "result_id": result.id,
         "percent": result.percent,
         "result": result.result,
         "resultPh": round(get_percent(result.percent) * 1000) / 1000,

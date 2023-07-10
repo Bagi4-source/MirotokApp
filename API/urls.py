@@ -36,7 +36,6 @@ admin_urls = [
     path('get_all_messages/', admin_views.get_all_messages, name='GetAllMessages'),
     path('get_user_diary/', admin_views.get_user_diary, name='GetUserDiary'),
     path('get_user_results/', admin_views.get_user_results, name='GetUserResults'),
-    path('get_user_result/', admin_views.get_user_result, name='GetUserResult'),
 ]
 
 urlpatterns.extend(admin_urls)

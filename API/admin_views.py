@@ -111,7 +111,7 @@ def get_user(request):
 
     userData = {}
     try:
-        user = UserInfo.objects.filter(id=user_id)
+        user = UserInfo.objects.filter(user_id=user_id)
         if user:
             user = user.first()
             path = minio.get_url("avatars", f"user{user.user.id}.png")
@@ -299,6 +299,7 @@ def get_user_results(request):
     try:
         for result in Results.objects.filter(user=userObj).order_by('-id')[offset: limit + offset]:
             res = {
+                "result_id": result.id,
                 "percent": result.percent,
                 "resultPh": round(get_percent(result.percent) * 1000) / 1000,
             }
@@ -312,45 +313,6 @@ def get_user_results(request):
         return JsonResponse({"success": 0, "error": f"{e}"})
 
     return JsonResponse({"success": 1, "data": data, "total": Results.objects.filter(user=userObj).count()})
-
-
-@sync_to_async
-@api_view(["POST"])
-def get_user_result(request):
-    body = json.loads(request.body.decode())
-    necessary_keys = ['result_id']
-    for key in necessary_keys:
-        if key not in body:
-            return JsonResponse(
-                {"success": 0, "error": f"The request must contain the following parameters: {necessary_keys}"})
-
-    token = request.headers.get('token', '')
-
-    tokenObj = Token.objects.filter(token=token)
-    if not tokenObj:
-        return JsonResponse({"success": 0, "error": "Token not found"})
-
-    tokenObj = tokenObj.first()
-    if tokenObj.user.role != 1:
-        return JsonResponse({"success": 0, "error": "Permission issue"})
-
-    try:
-        result_id = int(body.get('result_id'))
-    except:
-        return JsonResponse({"success": 0, "error": "Incorrect data"})
-
-    resultObj = Results.objects.filter(id=result_id)
-    if not resultObj:
-        return JsonResponse({"success": 0, "error": "Result not found"})
-
-    result = resultObj.first()
-    data = {
-        "percent": result.percent,
-        "result": result.result,
-        "resultPh": round(get_percent(result.percent) * 1000) / 1000,
-        "time": int(result.create_time.timestamp()),
-    }
-    return JsonResponse({"success": 1, "data": data})
 
 
 @sync_to_async
